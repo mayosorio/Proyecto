@@ -1,0 +1,161 @@
+import re
+
+class Lote:
+    def __init__(self, numero, tamaño, precio):
+        self.numero = numero
+        self.tamaño = tamaño
+        self.precio = precio
+        self.disponible = True
+
+
+class LoteosDuoc:
+    def __init__(self):
+        self.lotes = [
+            [Lote(1, "300 m²", "$250,000"), Lote(2, "180 m²", "$90,000"), Lote(3, "220 m²", "$110,000"), Lote(4, "190 m²", "$95,000"), Lote(5, "210 m²", "$105,000")],
+            [Lote(6, "170 m²", "$85,000"), Lote(7, "200 m²", "$100,000"), Lote(8, "180 m²", "$90,000"), Lote(9, "190 m²", "$95,000"), Lote(10, "200 m²", "$100,000")],
+            [Lote(11, "220 m²", "$110,000"), Lote(12, "210 m²", "$105,000"), Lote(13, "230 m²", "$115,000"), Lote(14, "240 m²", "$120,000"), Lote(15, "300 m²", "$250,000")],
+            [Lote(16, "200 m²", "$100,000"), Lote(17, "190 m²", "$95,000"), Lote(18, "200 m²", "$100,000"), Lote(19, "210 m²", "$105,000"), Lote(20, "220 m²", "$110,000")]
+        ]
+        self.clientes = []
+
+    def mostrar_menu(self):
+        print("------- LoteosDuoc -------")
+        print("1. Ver disponibilidad de lotes")
+        print("2. Seleccionar un lote")
+        print("3. Ver detalles del lote seleccionado")
+        print("4. Ver clientes")
+        print("5. Salir")
+        print("--------------------")
+
+    def mostrar_disponibilidad_lotes(self):
+        print("Lotes Disponibles:")
+        for fila in self.lotes:
+            for lote in fila:
+                if lote.disponible:
+                    print("[ ]", end=" ")
+                else:
+                    print("[X]", end=" ")
+            print()
+        print()
+
+    def seleccionar_lote(self):
+        fila = int(input("Ingrese la fila del lote: ")) - 1
+        columna = int(input("Ingrese la columna del lote: ")) - 1
+
+        if fila < 0 or fila >= len(self.lotes) or columna < 0 or columna >= len(self.lotes[fila]):
+            print("Las coordenadas ingresadas no son válidas.\n")
+            return
+
+        lote_seleccionado = self.lotes[fila][columna]
+        if not lote_seleccionado.disponible:
+            print("El lote seleccionado no está disponible. Por favor, elija otro lote.\n")
+            return
+
+        rut = input("Ingrese su RUT: ")
+        if not self.validar_rut(rut):
+            print("El RUT ingresado no es válido.\n")
+            return
+
+        nombre = input("Ingrese su nombre completo: ")
+        if not self.validar_nombre(nombre):
+            print("El nombre ingresado no es válido.\n")
+            return
+
+        telefono = input("Ingrese su número de teléfono: ")
+        if not self.validar_telefono(telefono):
+            print("El número de teléfono ingresado no es válido.\n")
+            return
+
+        email = input("Ingrese su dirección de correo electrónico: ")
+        if not self.validar_email(email):
+            print("La dirección de correo electrónico ingresada no es válida.\n")
+            return
+
+        self.clientes.append({
+            "RUT": rut,
+            "Nombre": nombre,
+            "Teléfono": telefono,
+            "Email": email,
+            "Lote seleccionado": lote_seleccionado.numero
+        })
+
+        lote_seleccionado.disponible = False
+        print("¡Felicidades! Ha seleccionado el lote correctamente.\n")
+
+    def ver_detalles_lote_seleccionado(self):
+        rut = input("Ingrese su RUT: ")
+        lote_encontrado = None
+
+        for cliente in self.clientes:
+            if cliente["RUT"] == rut:
+                numero_lote = cliente["Lote seleccionado"]
+                for fila in self.lotes:
+                    for lote in fila:
+                        if lote.numero == numero_lote:
+                            lote_encontrado = lote
+                            break
+
+        if lote_encontrado:
+            print("Detalles del lote seleccionado:")
+            print("Número de lote:", lote_encontrado.numero)
+            print("Tamaño del terreno:", lote_encontrado.tamaño)
+            print("Precio:", lote_encontrado.precio)
+        else:
+            print("No se encontró ningún lote seleccionado con el RUT ingresado.\n")
+
+    def ver_clientes(self):
+        print("Clientes que han comprado un lote:")
+        if len(self.clientes) == 0:
+            print("No hay clientes registrados.")
+        else:
+            for cliente in self.clientes:
+                print("RUT:", cliente["RUT"])
+                print("Nombre:", cliente["Nombre"])
+                print("Teléfono:", cliente["Teléfono"])
+                print("Email:", cliente["Email"])
+                print("Número de lote seleccionado:", cliente["Lote seleccionado"])
+                print()
+
+    def validar_rut(self, rut):
+        # Validate the RUT format (e.g., 12345678-9)
+        pattern = r'^\d{7,8}-[kK0-9]$'
+        return bool(re.match(pattern, rut))
+
+    def validar_nombre(self, nombre):
+        # Validate the name format (only alphabetic characters and spaces)
+        pattern = r'^[a-zA-Z ]+$'
+        return bool(re.match(pattern, nombre))
+
+    def validar_telefono(self, telefono):
+        # Validate the phone number format (e.g., +1234567890, 1234567890)
+        pattern = r'^\+?\d{1,15}$'
+        return bool(re.match(pattern, telefono))
+
+    def validar_email(self, email):
+        # Validate the email format
+        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        return bool(re.match(pattern, email))
+
+    def ejecutar(self):
+        while True:
+            self.mostrar_menu()
+            opcion = input("Ingrese una opción: ")
+            if opcion not in ["1", "2", "3", "4", "5"]:
+                print("Opción inválida. Por favor, ingrese una opción válida.\n")
+                continue
+
+            if opcion == "1":
+                self.mostrar_disponibilidad_lotes()
+            elif opcion == "2":
+                self.seleccionar_lote()
+            elif opcion == "3":
+                self.ver_detalles_lote_seleccionado()
+            elif opcion == "4":
+                self.ver_clientes()
+            elif opcion == "5":
+                print("¡Gracias por utilizar el sistema de LoteosDuoc! ¡Hasta luego!")
+                break
+
+
+loteos_duoc = LoteosDuoc()
+loteos_duoc.ejecutar()
