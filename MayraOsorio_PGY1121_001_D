@@ -1,0 +1,153 @@
+import re
+
+class CasaFeliz:
+    def __init__(self):
+        self.deptos = [
+            [self.Depto(1, "3800 UF"), self.Depto(2, "3000 UF"), self.Depto(3, "2800 UF"), self.Depto(4, "3500 UF")],
+            [self.Depto(5, "3800 UF"), self.Depto(6, "3000 UF"), self.Depto(7, "2800 UF"), self.Depto(8, "3500 UF")],
+            [self.Depto(9, "3800 UF"), self.Depto(10, "3000 UF")]
+        ]
+        self.clientes = []
+
+    def mostrar_menu(self):
+        print("--------- Casa Feliz ---------")
+        print("1. Comprar departamento")
+        print("2. Mostrar departamentos disponibles")
+        print("3. Ver listado de compradores")
+        print("4. Mostrar ganancias totales")
+        print("5. Salir")
+        print("------------------------------")
+
+    def mostrar_disponibilidad_deptos(self):
+        print("Departamentos Disponibles:")
+        for fila in self.deptos:
+            for depto in fila:
+                if depto.disponible:
+                    print("[ ]", end=" ")
+                else:
+                    print("[X]", end=" ")
+            print()
+        print()
+
+    def seleccionar_deptos(self):
+        fila = int(input("Ingrese la fila del Departamento: ")) - 1
+        columna = int(input("Ingrese la columna del Departamento: ")) - 1
+
+        if fila < 0 or fila >= len(self.deptos) or columna < 0 or columna >= len(self.deptos[fila]):
+            print("Las coordenadas ingresadas no son válidas.\n")
+            return
+
+        depto_seleccionado = self.deptos[fila][columna]
+        if not depto_seleccionado.disponible:
+            print("El Departamento seleccionado no está disponible. Por favor, elija otro lote.\n")
+            return
+
+        rut = input("Ingrese su RUT: ")
+        if not self.validar_rut(rut):
+            print("El RUT ingresado no es válido.\n")
+            return
+
+        nombre = input("Ingrese su nombre completo: ")
+        if not self.validar_nombre(nombre):
+            print("El nombre ingresado no es válido.\n")
+            return
+
+        telefono = input("Ingrese su número de teléfono: ")
+        if not self.validar_telefono(telefono):
+            print("El número de teléfono ingresado no es válido.\n")
+            return
+
+        email = input("Ingrese su dirección de correo electrónico: ")
+        if not self.validar_email(email):
+            print("La dirección de correo electrónico ingresada no es válida.\n")
+            return
+
+        self.clientes.append({
+            "RUT": rut,
+            "Nombre": nombre,
+            "Teléfono": telefono,
+            "Email": email,
+            "Departamento seleccionado": depto_seleccionado.numero
+        })
+
+        depto_seleccionado.disponible = False
+        print("¡Felicidades! Ha seleccionado el lote correctamente.\n")
+
+    def ver_detalles_depto_seleccionado(self):
+        rut = input("Ingrese su RUT: ")
+        depto_encontrado = None
+
+        for cliente in self.clientes:
+            if cliente["RUT"] == rut:
+                numero_depto = cliente["Departamento seleccionado"]
+                for fila in self.deptos:
+                    for depto in fila:
+                        if depto.numero == numero_depto:
+                            depto_encontrado = depto
+                            break
+
+        if depto_encontrado:
+            print("Detalles del Departamento seleccionado:")
+            print("Número de Departamento:", depto_encontrado.numero)
+            print("Precio:", depto_encontrado.precio)
+        else:
+            print("No se encontró ningún departamento seleccionado con el RUT ingresado.\n")
+
+    def ver_clientes(self):
+        print("Clientes que han comprado un Departamento:")
+        if len(self.clientes) == 0:
+            print("No hay clientes registrados.")
+        else:
+            for cliente in self.clientes:
+                print("RUT:", cliente["RUT"])
+                print("Nombre:", cliente["Nombre"])
+                print("Teléfono:", cliente["Teléfono"])
+                print("Email:", cliente["Email"])
+                print("Número de Departamento seleccionado:", cliente["Departamento seleccionado"])
+                print()
+
+    def validar_rut(self, rut):
+        pattern = r'^\d{1,8}-[kK0-9]$'
+        return bool(re.match(pattern, rut))
+
+    def validar_nombre(self, nombre):
+        pattern = r'^[a-zA-Z ]+$'
+        return bool(re.match(pattern, nombre))
+
+    def validar_telefono(self, telefono):
+        pattern = r'^\+?\d{1,15}$'
+        return bool(re.match(pattern, telefono))
+
+    def validar_email(self, email):
+        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        return bool(re.match(pattern, email))
+
+    def ejecutar(self):
+        while True:
+            self.mostrar_menu()
+            opcion = input("Ingrese una opción: ")
+            if opcion not in ["1", "2", "3", "4", "5"]:
+                print("Opción inválida. Por favor, ingrese una opción válida.\n")
+                continue
+
+            if opcion == "1":
+                self.mostrar_disponibilidad_deptos()
+                self.seleccionar_deptos()
+            elif opcion == "2":
+                self.mostrar_disponibilidad_deptos()
+            elif opcion == "3":
+                self.ver_detalles_depto_seleccionado()
+            elif opcion == "4":
+                self.ver_clientes()
+            elif opcion == "5":
+                print("¡Gracias por utilizar el sistema de Casa Feliz! ¡Hasta luego!")
+                break
+
+    class Depto:
+        def __init__(self, numero, precio):
+            self.numero = numero
+            self.precio = precio
+            self.disponible = True
+
+casa_feliz = CasaFeliz()
+casa_feliz.ejecutar()
